@@ -1,0 +1,25 @@
+#!/bin/csh -f
+
+#set image = data/mnist/i3_01.png
+#set image = data/mnist/i6_01.png
+#set image = data/mnist/i8_01.png
+#set image = data/mnist/i9_01.png
+set image = data/mnist/i9_02.png
+
+## Negative tests
+#set image = data/mnist/ineg_01.png
+#set image = data/mnist/ineg_02.png
+
+set result = mnist_result
+
+echo "Running classification of image $image"
+python /usr/local/caffe/python/classify.py --model_def=examples/mnist/lenet_test.prototxt \
+        --pretrained_model=examples/mnist/lenet_pretrained.caffemodel \
+        --gpu \
+        --images_dim='28,28' \
+        --input_scale=0.00390625 \
+        --channel_swap=0 \
+        --mean_file='' \
+        $image \
+        $result
+
