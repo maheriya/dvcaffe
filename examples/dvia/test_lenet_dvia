@@ -1,0 +1,19 @@
+#!/bin/csh -f
+
+#set image = data/dvia/ineg_01.png
+set image = data/dvia/stairs_up/stairs_up_001.png
+#set image = data/dvia/stairs_dn/stairs_dn_011.png
+
+set result = dvia_result
+
+echo "Running classification of image $image"
+python /usr/local/caffe/python/classify.py --model_def=examples/dvia/dvia_lenet_test.prototxt \
+        --pretrained_model=examples/dvia/dvia_lenet_pretrained.caffemodel \
+#        --gpu \
+        --images_dim='28,28' \
+        --input_scale=0.00390625 \
+        --channel_swap=0 \
+        --mean_file='' \
+        $image \
+        $result
+
