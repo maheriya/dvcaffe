@@ -46,6 +46,11 @@ def main(argv):
         help="Switch for gpu computation."
     )
     parser.add_argument(
+        "--color",
+        action='store_true',
+        help="Input image color."
+    )
+    parser.add_argument(
         "--center_only",
         action='store_true',
         help="Switch for prediction from center crop alone instead of " +
@@ -116,11 +121,11 @@ def main(argv):
         inputs = np.load(args.input_file)
     elif os.path.isdir(args.input_file):
         print("Loading folder: %s" % args.input_file)
-        inputs =[caffe.io.load_image(im_f)
+        inputs =[caffe.io.load_image(im_f, args.color)
                  for im_f in glob.glob(args.input_file + '/*.' + args.ext)]
     else:
         print("Loading file: %s" % args.input_file)
-        inputs = [caffe.io.load_image(args.input_file)]
+        inputs = [caffe.io.load_image(args.input_file, args.color)]
 
     print("Classifying %d inputs." % len(inputs))
 
@@ -132,7 +137,8 @@ def main(argv):
     # Save
     print("Saving results into %s" % args.output_file)
     np.save(args.output_file, predictions)
-
+    print 'prediction shape:', predictions[0].shape
+    print 'predicted class:', predictions[0].argmax()
 
 if __name__ == '__main__':
     main(sys.argv)

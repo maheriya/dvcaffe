@@ -75,7 +75,17 @@ int main(int argc, char** argv) {
   std::vector<std::pair<std::string, int> > lines;
   std::string filename;
   int label;
+  std::cout << "------------------------------------------" << std::endl;
+  std::cout << "Color? " << is_color << std::endl;;
+  std::cout << "Encoded? " << encoded << std::endl;;
+  std::cout << "Encode type: " << encode_type << std::endl;;
+  std::cout << "Shuffle? " << FLAGS_shuffle << std::endl;;
+  std::cout << "Input list file: " << argv[2] << std::endl;;
+  std::cout << "------------------------------------------" << std::endl;
+
+  std::cout << "Processing input list file: " << argv[2] << std::endl;;
   while (infile >> filename >> label) {
+    //std::cout << "\tImage file: " << filename << "\tLabel: " << label << std::endl;
     lines.push_back(std::make_pair(filename, label));
   }
   if (FLAGS_shuffle) {
@@ -118,19 +128,30 @@ int main(int argc, char** argv) {
     status = ReadImageToDatum(root_folder + lines[line_id].first,
         lines[line_id].second, resize_height, resize_width, is_color,
         enc, &datum);
-    if (status == false) continue;
+    if (status == false) {
+        std::cerr << "Failed to read image " << lines[line_id].first << std::endl;
+        continue;
+    }
     if (check_size) {
       if (!data_size_initialized) {
         data_size = datum.channels() * datum.height() * datum.width();
+        std::cout << "---\nInitial image parameters  datum.channels(): " << datum.channels()
+                  << "\ndatum.height(): " << datum.height()
+                  << "\ndatum.width(): " << datum.width() << "\n------" << std::endl;
+        std::cout << "Initial image size " << datum.channels() * datum.height() * datum.width() << std::endl;
+        const std::string& data = datum.data();
+        std::cout << "Image size (datum.data.size()): " << data.size() << std::endl;
         data_size_initialized = true;
       } else {
         const std::string& data = datum.data();
-        CHECK_EQ(data.size(), data_size) << "Incorrect data field size "
-            << data.size();
+        std::cout << "Image size (datum.data.size()): " << data.size() << std::endl;
+        CHECK_EQ(data.size(), data_size) << "Incorrect data field size " << data.size();
       }
     }
     // sequential
-    string key_str = caffe::format_int(line_id, 8) + "_" + lines[line_id].first;
+    //string key_str = caffe::format_int(line_id, 8) + "_" + lines[line_id].first;
+    string key_str = caffe::format_int(line_id, 8); // + "_" + lines[line_id].first;
+    std::cout << "Key: " << key_str << "\tFile: " << lines[line_id].first << std::endl;
 
     // Put in db
     string out;

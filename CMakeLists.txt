@@ -5,7 +5,11 @@ endif()
 if(POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif()
-
+# specify the cross compiler
+SET(CMAKE_C_COMPILER   /usr/bin/gcc-5)
+SET(CMAKE_CXX_COMPILER /usr/bin/g++-5)
+SET(CC /usr/bin/gcc-5)
+SET(CXX /usr/bin/g++-5)
 # ---[ Caffe project
 project(Caffe C CXX)
 
@@ -27,7 +31,7 @@ include(cmake/ConfigGen.cmake)
 
 # ---[ Options
 caffe_option(CPU_ONLY  "Build Caffe without CUDA support" OFF) # TODO: rename to USE_CUDA
-caffe_option(USE_CUDNN "Build Caffe with cuDNN library support" ON IF NOT CPU_ONLY)
+caffe_option(USE_CUDNN "Build Caffe with cuDNN library support" OFF) # ON IF NOT CPU_ONLY)
 caffe_option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 caffe_option(BUILD_python "Build Python wrapper" ON)
 set(python_version "2" CACHE STRING "Specify which Python version to use")
