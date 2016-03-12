@@ -1,0 +1,17 @@
+stairs_dn/stairs_dn_050.png 0 1 0 0 0
+stairs_dn/stairs_dn_051.png 0 1 0 0 0
+stairs_dn/stairs_dn_052.png 0 1 0 0 0
+stairs_dn/stairs_dn_053.png 0 1 0 0 0
+stairs_dn/stairs_dn_054.png 0 1 0 0 0
+stairs_dn/stairs_dn_055.png 0 1 0 0 0
+stairs_up/stairs_up_090.png 1 0 0 0 0
+stairs_up/stairs_up_091.png 0 1 0 0 0
+stairs_up/stairs_up_092.png 0 1 0 0 0
+stairs_up/stairs_up_093.png 0 1 0 0 0
+stairs_up/stairs_up_094.png 0 1 0 0 0
+stairs_up/stairs_up_095.png 0 1 0 0 0
+stairs_up/stairs_up_096.png 0 1 0 0 0
+stairs_up/stairs_up_097.png 0 1 0 0 0
+stairs_up/stairs_up_098.png 0 1 0 0 0
+stairs_up/stairs_up_099.png 0 1 0 0 0
+stairs_up/stairs_up_100.png 1 0 0 0 0

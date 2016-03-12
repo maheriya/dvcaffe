@@ -42,15 +42,16 @@ def main(argv):
 
             # Initiallize the data and label array
             X  = np.zeros( (len(lines), 1, args.size, args.size), dtype='f4' )
-            #y = np.zeros( (len(lines), args.n_l), dtype='int' )
-            y = {}
+            y = np.zeros( (len(lines), args.n_l), dtype=np.int32 )
+            #y = {}
             for i,l in enumerate(lines):
                 l = l.strip()
                 sp = l.split(' ')
                 img = caffe.io.load_image( sp[0] , color=False)
                 img = np.transpose( img , (2,0,1))
                 X[i] = img
-                y[i] = int(sp[1])
+                #y[i] = int(sp[1])
+                y[i] = sp[1:]
                 #print y[i]
 
         # Transpose the X and y arrays for HDF5
@@ -60,7 +61,7 @@ def main(argv):
         # Write to database hdf5
         with h5py.File(args.output_file,'w') as H:
             H.create_dataset( 'data', data=X ) # note the name data given to the dataset!
-            H.create_dataset( 'label', data=y, dtype='int' ) # note the name label given to the dataset!
+            H.create_dataset( 'label', data=y ) # note the name label given to the dataset!
     else:
         raise Exception("Unknown input file type: not in txt.")
 
