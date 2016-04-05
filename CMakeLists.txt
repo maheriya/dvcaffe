@@ -6,10 +6,10 @@ if(POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif()
 # specify the cross compiler
-SET(CMAKE_C_COMPILER   /usr/bin/gcc-5)
-SET(CMAKE_CXX_COMPILER /usr/bin/g++-5)
-SET(CC /usr/bin/gcc-5)
-SET(CXX /usr/bin/g++-5)
+#SET(CMAKE_C_COMPILER   /usr/bin/gcc-5)
+#SET(CMAKE_CXX_COMPILER /usr/bin/g++-5)
+#SET(CC /usr/bin/gcc-5)
+#SET(CXX /usr/bin/g++-5)
 # ---[ Caffe project
 project(Caffe C CXX)
 

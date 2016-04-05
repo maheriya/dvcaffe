@@ -1,19 +1,23 @@
 #!/bin/csh -f
 
-#set image = data/dvia/ineg_01.png
-set image = data/dvia/stairs_up/stairs_up_001.png
-#set image = data/dvia/stairs_dn/stairs_dn_011.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/img_curb_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/img_negative_2_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/img_negative_1_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/img_stair_c_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/img_stair_big_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/climbing-the-stairs_40x40.png
+#set image = /home/shiva/Projects/IMAGES/test_dvia/1280px-Harmachis-temple_doorframe_40x40.png
+set image = /home/shiva/Projects/IMAGES/test_dvia/Door_in_rural_Punjab_40x40.png
 
 set result = dvia_result
 
 echo "Running classification of image $image"
 python /usr/local/caffe/python/classify.py --model_def=examples/dvia/dvia_lenet_test.prototxt \
-        --pretrained_model=examples/dvia/dvia_lenet_pretrained.caffemodel \
+        --pretrained_model examples/dvia/dvia_lenet_pretrained.caffemodel \
 #        --gpu \
-        --images_dim='28,28' \
+        --images_dim='40,40' \
         --input_scale=0.00390625 \
         --channel_swap=0 \
         --mean_file='' \
         $image \
         $result
-

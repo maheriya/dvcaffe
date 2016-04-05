@@ -11,8 +11,8 @@ layer {
     scale: 0.00390625
   }
   data_param {
-    source: "examples/dvia/dvia_train_lmdb"
-    batch_size: 5
+    source: "data/dvia/dvia_train_lmdb"
+    batch_size: 50
     backend: LMDB
   }
 }
@@ -28,8 +28,8 @@ layer {
     scale: 0.00390625
   }
   data_param {
-    source: "examples/dvia/dvia_val_lmdb"
-    batch_size: 10
+    source: "data/dvia/dvia_val_lmdb"
+    batch_size: 50
     backend: LMDB
   }
 }
@@ -140,7 +140,7 @@ layer {
     lr_mult: 2
   }
   inner_product_param {
-    num_output: 3
+    num_output: 5
     weight_filler {
       type: "xavier"
     }

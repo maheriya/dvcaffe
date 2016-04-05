@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
-set DBDIR   = examples/dvia
-set DATA    = data/dvia
+set DBDIR   = data/dvia
+set DATA    = $HOME/Projects/IMAGES/dvia/png
 set TOOLS   = build/tools
 set EXTRA_OPTS = ( --encoded --encode_type=png )
 #set EXTRA_OPTS = ( --encoded=false  )
@@ -18,8 +18,8 @@ if ($RESIZE) then
   #set RESIZE_HEIGHT = 32
   #set RESIZE_WIDTH  = 24
   ## LeNet dimensions
-  set RESIZE_HEIGHT = 28
-  set RESIZE_WIDTH  = 28
+  set RESIZE_HEIGHT = 40
+  set RESIZE_WIDTH  = 40
 else
   set RESIZE_HEIGHT = 0
   set RESIZE_WIDTH  = 0
