@@ -10,6 +10,10 @@ import sys
 import argparse
 import glob
 import time
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
+import matplotlib.pyplot as plt
+
 
 import caffe
 
@@ -127,18 +131,39 @@ def main(argv):
         print("Loading file: %s" % args.input_file)
         inputs = [caffe.io.load_image(args.input_file, args.color)]
 
-    print("Classifying %d inputs." % len(inputs))
+    print("==== Classifying %d inputs." % len(inputs))
 
     # Classify.
     start = time.time()
     predictions = classifier.predict(inputs, not args.center_only)
-    print("Done in %.2f s." % (time.time() - start))
+    print("==== Done in %.2f s." % (time.time() - start))
 
     # Save
     print("Saving results into %s" % args.output_file)
     np.save(args.output_file, predictions)
     print 'prediction shape:', predictions[0].shape
-    print 'predicted class:', predictions[0].argmax()
+    print '==== predictions     :', predictions[0]
+    print '==== predicted class:', predictions[0].argmax()
+    sys.stdout.flush()
+    sys.stderr.flush()
+
+    # Re-read image as color image since matplotlib doesn't work with mono images
+    input_image = caffe.io.load_image(args.input_file, True)
+    plt.figure(1)
+    plt.subplot(211)
+    plt.imshow(input_image)
+    ax = plt.subplot(212)
+    width = 0.24
+    ax.bar(range(len(predictions[0])), predictions[0], width)
+    ax.set_xticks(np.arange(len(predictions[0])) + width/2)
+    ax.set_xticklabels(['neg', 'stair', 'curb', 'door'], rotation=0)
+    ax.set_ylim([0,1])
+    ax.grid(b=True, which='major', axis='y', color='m', linestyle='-', linewidth=1)
+    plt.show()
+
+def pause():
+    os.system('read -s -n 1 -p "Press any key to continue..."')
+    print
 
 if __name__ == '__main__':
     main(sys.argv)
