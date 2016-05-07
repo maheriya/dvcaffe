@@ -1,0 +1,139 @@
+from pylab import *
+%matplotlib qt4
+
+
+# run scripts (if any) from caffe root
+import sys
+import os
+scriptpath = os.path.dirname(os.path.realpath( __file__ ))
+caffe_root  = os.path.sep.join(scriptpath.split(os.path.sep)[:-1])
+
+sys.path.insert(0, '/usr/local/caffe/python')
+import caffe
+from caffe import layers as L, params as P
+
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
+
+picklefile = sys.argv[-1]
+if 'plot_dvia.ipy' in picklefile:
+    print "picklefile name was not provided"
+    picklefile = None
+    sys.exit(1)
+
+
+#niter = 40000
+#test_interval = 200
+## losses will also be stored in the log
+#train_loss   = zeros(niter)
+#train_loss_x = zeros(niter)
+#test_loss    = zeros(niter)
+#test_loss_x  = zeros(niter)
+#test_acc     = zeros(int(np.ceil(niter / test_interval)))
+#test_acc_x   = zeros(int(np.ceil(niter / test_interval)))
+#output       = zeros((niter, 8, 4))
+#output_x     = zeros((niter, 8, 1))
+import pickle
+pfile = open(picklefile)
+plotvars = pickle.load(pfile)
+niter = plotvars['niter']
+test_interval = plotvars['test_interval']
+train_loss = plotvars['train_loss']
+train_loss_x = plotvars['train_loss_x']
+test_loss = plotvars['test_loss']
+test_loss_x = plotvars['test_loss_x']
+test_acc = plotvars['test_acc']
+test_acc_x = plotvars['test_acc_x']
+output = plotvars['output']
+output_x = plotvars['output_x']
+test_data = plotvars['test_data']
+pfile.close()
+
+
+def plotTrainAcc():
+    _, ax1 = subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(arange(niter), train_loss)
+    ax2.plot(test_interval * arange(len(test_acc)), test_acc, 'r')
+    ax1.set_xlabel('iteration')
+    ax1.set_ylabel('train loss')
+    ax2.set_ylabel('test accuracy')
+    ax2.set_title('Test Accuracy: {:.2f}'.format(test_acc[-1]))
+
+def plotTrainAccNpX():
+    _, ax1 = subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(arange(niter), train_loss_x)
+    ax2.plot(test_interval * arange(len(test_acc_x)), test_acc_x, 'r')
+    ax1.set_xlabel('iteration')
+    ax1.set_ylabel('train loss')
+    ax2.set_ylabel('test accuracy')
+    ax2.set_title('Test Accuracy NpX: {:.2f}'.format(test_acc_x[-1]))
+
+def plotLoss():
+    _, ax1 = subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(arange(niter), train_loss)
+    ax2.plot(arange(niter), test_loss, 'r')
+    ax1.set_xlabel('iteration')
+    ax1.set_ylabel('train loss')
+    ax2.set_ylabel('test loss')
+    ax2.set_title('Train/Test Loss')
+
+def plotLossNpX():
+    _, ax1 = subplots()
+    ax2 = ax1.twinx()
+    ax1.plot(arange(niter), train_loss_x)
+    ax2.plot(arange(niter), test_loss_x, 'r')
+    ax1.set_xlabel('iteration')
+    ax1.set_ylabel('train loss')
+    ax2.set_ylabel('test loss')
+    ax2.set_title('Train/Test Loss NpX')
+
+plotTrainAcc()
+plotTrainAccNpX()
+plotLoss()
+plotLossNpX()
+
+
+# Since we saved the results on the first test batch, we can watch how our prediction scores
+# evolved. We'll plot time on the x axis and each possible label on the y, with
+# lightness indicating confidence. These are raw scores
+#--for i in range(8):
+#--    figure(figsize=(2, 2))
+#--    imshow(test_data[i, 0], cmap='gray')
+#--    figure(figsize=(10, 2))
+#--    imshow(output[:50, i].T, interpolation='nearest', cmap='gray')
+#--    xlabel('iteration')
+#--    ylabel('label')
+
+# Same as above, except that these are softmax probabilities:
+figure()
+for i in range(8):
+    axl = subplot2grid((8,2), (i,0))
+    axl.axes.get_xaxis().set_ticks([])
+    axl.axes.get_yaxis().set_ticks([])
+    imshow(test_data[i, 0], cmap='gray')
+    axr = subplot2grid((8,2), (i,1))
+    width = 0.1
+    axr.set_yticks(np.arange(4) + width/2)
+    #axr.set_yticklabels(['neg', 'stair', 'curb', 'door'], rotation=0)
+    #xlabel('iteration')
+    #ylabel('class')
+    imshow(exp(output[:50, i].T) / exp(output[:50, i].T).sum(0), interpolation='nearest', cmap='gray')
+
+figure()
+for i in range(8):
+    axl = subplot2grid((8,2), (i,0))
+    axl.axes.get_xaxis().set_ticks([])
+    axl.axes.get_yaxis().set_ticks([])
+    imshow(test_data[i, 0], cmap='gray')
+    axr = subplot2grid((8,2), (i,1))
+    width = 0.1
+    axr.set_yticks(np.arange(1) + width/2)
+    #axr.set_yticklabels(['neg', 'stair', 'curb', 'door'], rotation=0)
+    #xlabel('iteration')
+    #ylabel('class')
+    imshow(exp(output_x[:50, i].T), interpolation='nearest', cmap='gray')
+
+
