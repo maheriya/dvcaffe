@@ -1,0 +1,69 @@
+from pylab import *
+%matplotlib qt4
+
+import os
+import sys
+scriptpath  = os.path.dirname(os.path.realpath( __file__ ))
+caffe_root  = os.path.sep.join(scriptpath.split(os.path.sep)[:-1])
+
+sys.path.insert(0, '/usr/local/caffe/python')
+import caffe
+
+import pprint
+pp = pprint.PrettyPrinter(indent=2)
+
+
+extradir         = "from_shiva/"
+HOME             = os.environ['HOME']
+IMAGES_DIR       = os.path.join(HOME, "Projects", extradir+"IMAGES/test_dvia")
+MODEL_DIR        = "dvia_mlc"
+PRETRAINED_MODEL = "dvia_mlc/dvia_deploy_np_adadelta.caffemodel"
+MODEL_DEF        = "dvia_mlc/dvia_deploy_np_test.prototxt"
+
+result           = "dvia_result"
+
+caffe.set_device(0)
+caffe.set_mode_gpu()
+
+classes = ['neg', 'stair', 'curb', 'door']
+
+# Load pretrained network
+print "Loading pre-trained network {}".format(PRETRAINED_MODEL)
+net = caffe.Net(MODEL_DEF, PRETRAINED_MODEL, caffe.TEST)
+print net.inputs
+
+# each output is (batch size, feature dim, spatial dim)
+print "Net's blobs:"
+pp.pprint([(k, v.data.shape) for k, v in net.blobs.items()])
+
+# just print the weight sizes (we'll omit the biases)
+print "Net's params:"
+pp.pprint([(k, v[0].data.shape) for k, v in net.params.items()])
+
+imgfile = os.path.join(IMAGES_DIR, "scaled_64x64", "img_curb.png")
+img     = caffe.io.load_image(imgfile, False)
+net.blobs['data'].data[...] = img.transpose(2, 0, 1)
+forward_result = net.forward()
+#print "Forward result:\n"
+#pp.pprint(forward_result)
+argmax = net.blobs['fc_class'].data.argmax(1)[0]
+print "Class: {c} (prob {p})".format(c=classes[argmax], p=forward_result['prob'][0][argmax])
+print "NpX: {}".format(forward_result['fc_npX'][0][0]*64)
+print "NpY: {}".format(forward_result['fc_npY'][0][0]*64)
+img_c = caffe.io.load_image(imgfile, True)
+imshow(img_c)
+
+
+def dump():
+    import pickle
+    pfile = open("dvia_plotvars.pkl", "wb")
+    pickle.dump(niter, pfile)
+    pickle.dump(test_interval, pfile)
+    pickle.dump(train_loss, pfile)
+    pickle.dump(train_loss_x, pfile)
+    pickle.dump(test_loss, pfile)
+    pickle.dump(test_loss_x, pfile)
+    pickle.dump(test_acc, pfile)
+    pickle.dump(test_acc_x, pfile)
+    pickle.dump(output, pfile)
+    pickle.dump(output_x, pfile)
