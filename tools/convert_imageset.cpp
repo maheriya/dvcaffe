@@ -72,9 +72,10 @@ int main(int argc, char** argv) {
   const string encode_type = FLAGS_encode_type;
 
   std::ifstream infile(argv[2]);
-  std::vector<std::pair<std::string, int> > lines;
+  std::vector<std::tuple<std::string, int, float, float> > lines;
   std::string filename;
   int label;
+  float npx, npy;
   std::cout << "------------------------------------------" << std::endl;
   std::cout << "Color? " << is_color << std::endl;;
   std::cout << "Encoded? " << encoded << std::endl;;
@@ -84,9 +85,9 @@ int main(int argc, char** argv) {
   std::cout << "------------------------------------------" << std::endl;
 
   std::cout << "Processing input list file: " << argv[2] << std::endl;;
-  while (infile >> filename >> label) {
+  while (infile >> filename >> label >> npx >> npy) {
     //std::cout << "\tImage file: " << filename << "\tLabel: " << label << std::endl;
-    lines.push_back(std::make_pair(filename, label));
+    lines.push_back(std::make_tuple(filename, label, npx, npy));
   }
   if (FLAGS_shuffle) {
     // randomly shuffle data
@@ -118,18 +119,20 @@ int main(int argc, char** argv) {
     std::string enc = encode_type;
     if (encoded && !enc.size()) {
       // Guess the encoding type from the file name
-      string fn = lines[line_id].first;
+      string fn = std::get<0>(lines[line_id]);
       size_t p = fn.rfind('.');
       if ( p == fn.npos )
         LOG(WARNING) << "Failed to guess the encoding of '" << fn << "'";
       enc = fn.substr(p);
       std::transform(enc.begin(), enc.end(), enc.begin(), ::tolower);
     }
-    status = ReadImageToDatum(root_folder + lines[line_id].first,
-        lines[line_id].second, resize_height, resize_width, is_color,
+    status = ReadImageToDatum(root_folder + std::get<0>(lines[line_id]),
+        std::get<1>(lines[line_id]), resize_height, resize_width, is_color,
         enc, &datum);
+    datum.set_npx(std::get<2>(lines[line_id]));
+    datum.set_npy(std::get<3>(lines[line_id]));
     if (status == false) {
-        std::cerr << "Failed to read image " << lines[line_id].first << std::endl;
+        std::cerr << "Failed to read image " << std::get<0>(lines[line_id]) << std::endl;
         continue;
     }
     if (check_size) {
@@ -149,9 +152,9 @@ int main(int argc, char** argv) {
       }
     }
     // sequential
-    //string key_str = caffe::format_int(line_id, 8) + "_" + lines[line_id].first;
-    string key_str = caffe::format_int(line_id, 8); // + "_" + lines[line_id].first;
-    std::cout << "Key: " << key_str << "\tFile: " << lines[line_id].first << std::endl;
+    //string key_str = caffe::format_int(line_id, 8) + "_" + std::get<0>(lines[line_id]);
+    string key_str = caffe::format_int(line_id, 8); // + "_" + std::get<0>(lines[line_id]);
+    std::cout << "Key: " << key_str << "\tFile: " << std::get<0>(lines[line_id]) << std::endl;
 
     // Put in db
     string out;
