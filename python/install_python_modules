@@ -1,0 +1,13 @@
+#!/bin/csh -f
+
+alias chkst 'if ($status != 0) then \
+  echo "Failure!"; \
+  exit(1); \
+endif'
+
+
+foreach module ( `cat requirements.txt`)
+  echo $module
+  sudo pip install "$module"
+  chkst
+end
