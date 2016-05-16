@@ -18,7 +18,7 @@ import glob
 import random
 import re
 
-srcDir = os.path.join(os.environ['HOME'], "Projects/IMAGES/dvia/small/png")
+srcDir = os.path.join(os.environ['HOME'], "Projects/IMAGES/dvia/png.48x48")
 
 scriptpath = os.path.dirname(os.path.realpath( __file__ ))
 

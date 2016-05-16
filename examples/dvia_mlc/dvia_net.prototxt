@@ -8,7 +8,7 @@ layer {
     phase: TRAIN
   }
   hdf5_data_param {
-    source: "examples/dvia_mlc/HDF5_NP/train.txt"
+    source: "examples/dvia_mlc_old/HDF5_NP/train.txt"
     batch_size: 50
     shuffle: true
   }
@@ -22,7 +22,7 @@ layer {
     phase: TEST
   }
   hdf5_data_param {
-    source: "examples/dvia_mlc/HDF5_NP/val.txt"
+    source: "examples/dvia_mlc_old/HDF5_NP/val.txt"
     batch_size: 50
   }
 }

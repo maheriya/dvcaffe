@@ -1,7 +1,7 @@
 #!/bin/csh -f
 
-set DBDIR   = data/dvia_mlc
-set DATA    = $HOME/Projects/IMAGES/dvia/small/png
+set DBDIR   = data/dvia_48x48
+set DATA    = $HOME/Projects/IMAGES/dvia/png.48x48
 set TOOLS   = /usr/local/caffe/bin
 set EXTRA_OPTS = ( --encoded --encode_type=png )
 #set EXTRA_OPTS = ( --encoded=false  )
@@ -10,8 +10,8 @@ set TRAIN_LIST      = "$DATA/train_NP.txt"
 set VAL_LIST        = "$DATA/val_NP.txt"
 set TRAIN_DATA_ROOT = "$DATA/"
 set VAL_DATA_ROOT   = "$DATA/"
-set TRAIN_LMDB      = "$DBDIR/dvia_trn_np_lmdb"
-set VAL_LMDB        = "$DBDIR/dvia_val_np_lmdb"
+set TRAIN_LMDB      = "$DBDIR/dvia_trn_lmdb"
+set VAL_LMDB        = "$DBDIR/dvia_val_lmdb"
 
 # Set RESIZE=true to resize the images to 32x24. Leave as false if images have
 # already been resized using another tool.
@@ -51,7 +51,6 @@ if ( -d $VAL_LMDB )   rm -rf $VAL_LMDB
 setenv GLOG_logtostderr 1
 $TOOLS/convert_imageset \
     --backend=lmdb \
-    --gray \
     $EXTRA_OPTS \
     --resize_height=$RESIZE_HEIGHT \
     --resize_width=$RESIZE_WIDTH \
@@ -65,7 +64,6 @@ echo "Creating validation lmdb..."
 setenv GLOG_logtostderr 1
 $TOOLS/convert_imageset \
     --backend=lmdb \
-    --gray \
     $EXTRA_OPTS \
     --resize_height=$RESIZE_HEIGHT \
     --resize_width=$RESIZE_WIDTH \

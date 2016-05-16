@@ -1,5 +1,5 @@
 from pylab import *
-%matplotlib qt4
+%pylab qt4
 
 
 # run scripts (if any) from caffe root
