@@ -141,7 +141,6 @@ def main(argv):
     # Save
     print("Saving results into %s" % args.output_file)
     np.save(args.output_file, predictions)
-    print 'prediction shape:', predictions[0].shape
     print '==== predictions     :', predictions[0]
     print '==== predicted class:', predictions[0].argmax()
     sys.stdout.flush()
