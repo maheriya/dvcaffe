@@ -4,7 +4,7 @@ test_net: "dvia_test.prototxt"
 test_iter: 100
 test_interval: 1000
 
-base_lr: 0.0006
+base_lr: 0.0004
 momentum: 0.0
 weight_decay: 0.001
 
@@ -14,10 +14,10 @@ power: 0.75
 
 display: 100
 
-max_iter: 150000
+max_iter: 200000
 
-snapshot: 50000
-snapshot_prefix: "cnn_snapshot"
+snapshot: 25000
+snapshot_prefix: "dvia_train"
 solver_mode: GPU
 
 type: "RMSProp"
