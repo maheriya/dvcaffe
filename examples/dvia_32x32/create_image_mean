@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import copy
+import os, sys
+from subprocess import check_output
+
+print("Creating mean files for Cifar and DVIA TRN and VAL LMDB...")
+cifar_db = os.path.realpath(os.path.join(os.environ['HOME'], 'Projects', 'IMAGES', 'dvia', 'cifar_png.32x32', 'data', 'cifar_32x32'))
+dvia_db = os.path.realpath(os.path.join(os.environ['HOME'], 'Projects', 'IMAGES', 'dvia', 'png.32x32', 'data', 'dvia_32x32'))
+if not os.path.exists(cifar_db):
+    print("DB directory {} doesn't exist!".format(cifar_db))
+    sys.exit(1)
+
+if not os.path.exists(dvia_db):
+    print("DB directory {} doesn't exist!".format(dvia_db))
+    sys.exit(1)
+
+def create_mean(lmdb, outmean):
+    if not os.path.exists(outmean):
+        try:
+            msg = check_output("/usr/local/caffe/bin/compute_image_mean {db} {mean}".format(db=lmdb, mean=outmean), shell=True)
+        except:
+            print("Error while creating {m}!".format(m=outmean))
+            sys.exit(1)
+        print('Created {} successfully.'.format(outmean))
+    else:
+        print("Mean file {} already exists. Skipped.".format(outmean))
+
+create_mean(os.path.join(cifar_db, 'trn_lmdb'), os.path.join(cifar_db, 'trn_mean.binaryproto'))
+create_mean(os.path.join(cifar_db, 'val_lmdb'), os.path.join(cifar_db, 'val_mean.binaryproto'))
+create_mean(os.path.join(dvia_db,  'trn_lmdb'), os.path.join(dvia_db,  'trn_mean.binaryproto'))
+create_mean(os.path.join(dvia_db,  'val_lmdb'), os.path.join(dvia_db,  'val_mean.binaryproto'))

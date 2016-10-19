@@ -1,0 +1,66 @@
+#from pylab import *
+#%pylab qt4
+
+import copy
+import os
+from subprocess import call
+
+import numpy as np
+import sklearn
+import sklearn.linear_model
+from scipy import misc as scmisc  # for imresize and imsave
+
+import h5py
+
+print("Converting...")
+cifar_png_directory = os.path.realpath(os.path.join(os.environ['HOME'], 'Projects', 'IMAGES', 'dvia', 'cifar_png.32x32'))
+cifar_python_directory = os.path.abspath("cifar-100-python")
+if not os.path.exists(cifar_png_directory):
+    os.makedirs(cifar_png_directory)
+    def unpickle(file):
+        import cPickle
+        fo = open(file, 'rb')
+        dict = cPickle.load(fo)
+        fo.close()
+        return dict
+    def shuffle_data(data, labels):
+        data, _, labels, _ = sklearn.cross_validation.train_test_split(
+            data, labels, test_size=0.0, random_state=42
+        )
+        return data, labels
+    def load_data(train_or_test):
+        data = []
+        labels = []
+        d = unpickle(
+            os.path.join(cifar_python_directory, train_or_test)
+        )
+        data = d['data']
+        coarse_labels = d['coarse_labels']
+        fine_labels = d['fine_labels']
+        length = len(d['fine_labels'])
+    
+        data, labels = shuffle_data(
+            data,
+            np.array(zip(coarse_labels, fine_labels))
+        )
+        coarse_labels, fine_labels = zip(*labels.tolist())
+    
+        scale(train_or_test, data.reshape(length, 3, 32, 32), length, coarse_labels, fine_labels),
+ 
+    def scale(train_or_test, data, length, coarse_labels, fine_labels):
+        flabels = open(os.path.join(cifar_png_directory, train_or_test + '.txt'), 'w')
+        for i in range(length):
+            img = data[i].transpose(1,2,0) # dim 32x32x3
+            imgfname = 'cifar100_{t}_{id:0>6}.png'.format(t=train_or_test, id=i)
+            # Save as PNG
+            scmisc.imsave(os.path.join(cifar_png_directory, imgfname), img)
+            # Update labels file...
+            flabels.write('{f} {lc} {lf}\n'.format(f=imgfname, lc=coarse_labels[i], lf=fine_labels[i]))
+        flabels.close()
+
+    load_data("train")
+    load_data("test")
+
+    print('Conversion successfully done. PNG files written to "{}".\n'.format(cifar_png_directory))
+else:
+    print("Conversion was already done. Did not convert twice.\n")
