@@ -20,16 +20,16 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 0.75
-    decay_mult: 0.75
+    lr_mult: 0.25
+    decay_mult: 0.25
   }
   param {
-    lr_mult: 1.5
+    lr_mult: 0.5
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
-    kernel_size: 4
+    num_output: 50
+    kernel_size: 5
     stride: 1
     weight_filler {
       type: "xavier"
@@ -37,41 +37,26 @@ layer {
   }
 }
 layer {
-  name: "bn1"
-  type: "BatchNorm"
-  bottom: "conv1"
-  top: "bn1"
-  param {
-    lr_mult: 0
-  }
-  param {
-    lr_mult: 0
-  }
-  param {
-    lr_mult: 0
-  }
-}
-layer {
   name: "relu1"
   type: "ReLU"
-  bottom: "bn1"
-  top: "bn1"
+  bottom: "conv1"
+  top: "conv1"
 }
 layer {
   name: "cccp1a"
   type: "Convolution"
-  bottom: "bn1"
+  bottom: "conv1"
   top: "cccp1a"
   param {
-    lr_mult: 0.75
-    decay_mult: 0.75
+    lr_mult: 0.25
+    decay_mult: 0.25
   }
   param {
-    lr_mult: 1.5
+    lr_mult: 0.5
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 50
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -91,15 +76,15 @@ layer {
   bottom: "cccp1a"
   top: "cccp1b"
   param {
-    lr_mult: 0.75
-    decay_mult: 0.75
+    lr_mult: 0.25
+    decay_mult: 0.25
   }
   param {
-    lr_mult: 1.5
+    lr_mult: 0.5
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 50
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -108,30 +93,21 @@ layer {
   }
 }
 layer {
-  name: "relu1b"
-  type: "ReLU"
-  bottom: "cccp1b"
-  top: "cccp1b"
-}
-layer {
   name: "pool1"
   type: "Pooling"
   bottom: "cccp1b"
   top: "pool1"
   pooling_param {
     pool: MAX
-    kernel_size: 3
+    kernel_size: 2
     stride: 2
   }
 }
 layer {
-  name: "drop1"
-  type: "Dropout"
+  name: "relu1b"
+  type: "ReLU"
   bottom: "pool1"
   top: "pool1"
-  dropout_param {
-    dropout_ratio: 0.3
-  }
 }
 layer {
   name: "conv2"
@@ -147,19 +123,13 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 80
-    kernel_size: 4
+    num_output: 100
+    kernel_size: 3
     stride: 1
     weight_filler {
       type: "xavier"
     }
   }
-}
-layer {
-  name: "relu2"
-  type: "ReLU"
-  bottom: "conv2"
-  top: "conv2"
 }
 layer {
   name: "pool2"
@@ -168,18 +138,15 @@ layer {
   top: "pool2"
   pooling_param {
     pool: MAX
-    kernel_size: 3
+    kernel_size: 2
     stride: 2
   }
 }
 layer {
-  name: "drop2"
-  type: "Dropout"
+  name: "relu2"
+  type: "ReLU"
   bottom: "pool2"
   top: "pool2"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
 }
 layer {
   name: "conv3"
@@ -195,19 +162,13 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 140
+    num_output: 200
     kernel_size: 3
     stride: 1
     weight_filler {
       type: "xavier"
     }
   }
-}
-layer {
-  name: "relu3"
-  type: "ReLU"
-  bottom: "conv3"
-  top: "conv3"
 }
 layer {
   name: "pool3"
@@ -221,13 +182,10 @@ layer {
   }
 }
 layer {
-  name: "drop3"
-  type: "Dropout"
+  name: "relu3"
+  type: "ReLU"
   bottom: "pool3"
   top: "pool3"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
 }
 layer {
   name: "conv_last"
@@ -243,7 +201,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 280
+    num_output: 400
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -256,15 +214,6 @@ layer {
   type: "ReLU"
   bottom: "conv_last"
   top: "conv_last"
-}
-layer {
-  name: "drop_last"
-  type: "Dropout"
-  bottom: "conv_last"
-  top: "conv_last"
-  dropout_param {
-    dropout_ratio: 0.5
-  }
 }
 layer {
   name: "fc_class"

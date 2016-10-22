@@ -2,15 +2,15 @@ layer {
   name: "data"
   type: "Data"
   top: "data"
-  top: "label"
+  top: "label_coarse"
   transform_param {
     scale: 0.00390625
     mirror: true
-    mean_file: "/home/maheriya/Projects/IMAGES/dvia/png.32x32/data/dvia_32x32/val_mean.binaryproto"
+    mean_file: "/home/maheriya/Projects/IMAGES/dvia/cifar_png.32x32/data/cifar_32x32/trn_mean.binaryproto"
   }
   data_param {
-    source: "/home/maheriya/Projects/IMAGES/dvia/png.32x32/data/dvia_32x32/val_lmdb"
-    batch_size: 120
+    source: "/home/maheriya/Projects/IMAGES/dvia/cifar_png.32x32/data/cifar_32x32/trn_lmdb"
+    batch_size: 100
     backend: LMDB
   }
 }
@@ -20,11 +20,11 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -48,11 +48,11 @@ layer {
   bottom: "conv1"
   top: "cccp1a"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -76,11 +76,11 @@ layer {
   bottom: "cccp1a"
   top: "cccp1b"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -216,10 +216,10 @@ layer {
   top: "conv_last"
 }
 layer {
-  name: "fc_class"
+  name: "fc_coarse"
   type: "InnerProduct"
   bottom: "conv_last"
-  top: "fc_class"
+  top: "fc_coarse"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -229,23 +229,23 @@ layer {
     decay_mult: 0
   }
   inner_product_param {
-    num_output: 4
+    num_output: 20
     weight_filler {
       type: "xavier"
     }
   }
 }
 layer {
-  name: "accuracy_class"
+  name: "accuracy_coarse"
   type: "Accuracy"
-  bottom: "fc_class"
-  bottom: "label"
-  top: "accuracy_class"
+  bottom: "fc_coarse"
+  bottom: "label_coarse"
+  top: "accuracy_coarse"
 }
 layer {
-  name: "loss_class"
+  name: "loss_coarse"
   type: "SoftmaxWithLoss"
-  bottom: "fc_class"
-  bottom: "label"
-  top: "loss_class"
+  bottom: "fc_coarse"
+  bottom: "label_coarse"
+  top: "loss_coarse"
 }
