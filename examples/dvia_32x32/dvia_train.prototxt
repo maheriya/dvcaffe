@@ -10,7 +10,7 @@ layer {
   }
   data_param {
     source: "/home/maheriya/Projects/IMAGES/dvia/png.32x32/data/dvia_32x32/trn_lmdb"
-    batch_size: 100
+    batch_size: 80
     backend: LMDB
   }
 }
@@ -20,15 +20,15 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 0.1
+    decay_mult: 0.1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 0.2
     decay_mult: 0
   }
   convolution_param {
-    num_output: 50
+    num_output: 45
     kernel_size: 5
     stride: 1
     weight_filler {
@@ -48,15 +48,15 @@ layer {
   bottom: "conv1"
   top: "cccp1a"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 0.1
+    decay_mult: 0.1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 0.2
     decay_mult: 0
   }
   convolution_param {
-    num_output: 50
+    num_output: 45
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -76,15 +76,15 @@ layer {
   bottom: "cccp1a"
   top: "cccp1b"
   param {
-    lr_mult: 0.25
-    decay_mult: 0.25
+    lr_mult: 0.1
+    decay_mult: 0.1
   }
   param {
-    lr_mult: 0.5
+    lr_mult: 0.2
     decay_mult: 0
   }
   convolution_param {
-    num_output: 50
+    num_output: 45
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -123,7 +123,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 100
+    num_output: 90
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -162,7 +162,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 200
+    num_output: 180
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -201,7 +201,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 400
+    num_output: 360
     kernel_size: 1
     stride: 1
     weight_filler {

@@ -1,0 +1,200 @@
+#
+# Run this as 'ipython dvia-train-32x32.ipy'
+#
+import numpy as np
+import os, sys
+import re
+
+scriptpath    = os.path.dirname(os.path.realpath( "xxxx" ))
+caffe_root    = os.path.sep.join(scriptpath.split(os.path.sep)[:-2])
+#caffe_root  = os.path.join(os.environ['HOME'], 'Projects', 'dvcaffe')
+cifar_db_root = os.path.join(os.environ['HOME'], 'Projects', 'IMAGES', 'dvia', 'cifar_png.32x32')
+dvia_db_root  = os.path.join(os.environ['HOME'], 'Projects', 'IMAGES', 'dvia', 'png.32x32')
+
+import caffe
+from caffe import layers as L
+from caffe import params as P
+
+print "scriptpath = {}".format(scriptpath)
+print "caffe_root = {}".format(caffe_root)
+print "cifar_db_root = {}".format(cifar_db_root)
+print "dvia_db_root = {}".format(dvia_db_root)
+
+
+
+##################################################
+# 2
+##################################################
+weight_param = dict(lr_mult=1, decay_mult=1)
+bias_param   = dict(lr_mult=2, decay_mult=0)
+## Use for training from scratch
+learned_param = [weight_param, bias_param]
+
+frozen_weight_param = dict(lr_mult=0.1, decay_mult=0.1)  # *0.25
+frozen_bias_param   = dict(lr_mult=0.2, decay_mult=0)    # *0.25
+## Use for training from a pretrained model
+frozen_param = [frozen_weight_param, frozen_bias_param]
+
+wgt_filler = {'type': 'xavier'}
+bn_param = '''param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }
+  param {
+    lr_mult: 0
+  }'''
+
+def cnn_inner_layers(n, param=learned_param):
+    '''
+    n: caffe.NetSpec instance
+    It is assumed that n.data is already created.
+    '''
+    # First main conv layer
+    n.conv1  = L.Convolution(n.data,     kernel_size=5, stride=1, num_output=45, weight_filler=wgt_filler, param=param)
+    n.relu1  = L.ReLU(n.conv1, in_place=True)
+    n.cccp1a = L.Convolution(n.relu1,    kernel_size=1, stride=1, num_output=45, weight_filler=wgt_filler, param=param)
+    n.relu1a = L.ReLU(n.cccp1a, in_place=True)
+    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=45, weight_filler=wgt_filler, param=param)
+    n.pool1  = L.Pooling(n.cccp1b,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.relu1b = L.ReLU(n.pool1, in_place=True)
+
+    # Second main conv layer
+    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=90, weight_filler=wgt_filler, param=learned_param)
+    n.pool2  = L.Pooling(n.conv2,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.relu2  = L.ReLU(n.pool2, in_place=True)
+
+    # Third and last main convolution layer.
+    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=180, weight_filler=wgt_filler, param=learned_param)
+    n.pool3  = L.Pooling(n.conv3,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.relu3  = L.ReLU(n.pool3, in_place=True)
+
+    # Last fc converted to convolution.
+    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=360, weight_filler=wgt_filler, param=learned_param)
+    n.relu_last = L.ReLU(n.conv_last, in_place=True)
+    return n
+
+
+# For pre-training
+def cnn_cifar(imgdb, mean_file, batch_size, mirror=True):
+    n = caffe.NetSpec()
+    #n.data, n.label_coarse, n.label_fine = L.HDF5Data(batch_size=batch_size, source=imgdb, ntop=3)
+    n.data, n.label_coarse = L.Data(batch_size=batch_size, source=imgdb, backend=P.Data.LMDB, 
+                             transform_param=dict(scale=1./256, mirror=mirror, mean_file=mean_file), ntop=2)
+
+    # Create inner layers
+    n = cnn_inner_layers(n)
+
+    # Output: 20-class and 100-class classifiers
+    n.fc_coarse       = L.InnerProduct(n.relu_last, num_output=20, weight_filler=wgt_filler, param=learned_param)
+    n.accuracy_coarse = L.Accuracy(n.fc_coarse, n.label_coarse)
+    n.loss_coarse     = L.SoftmaxWithLoss(n.fc_coarse, n.label_coarse)
+#     n.fc_coarse       = L.Convolution(n.drop_last, kernel_size=1, stride=1, num_output=20, weight_filler=wgt_filler, param=learned_param)
+#     n.fc_avpool_coarse= L.Pooling(n.fc_coarse, kernel_size=2, stride=2, pool=P.Pooling.AVE)
+#     n.accuracy_coarse = L.Accuracy(n.fc_avpool_coarse, n.label_coarse)
+#     n.loss_coarse     = L.SoftmaxWithLoss(n.fc_avpool_coarse, n.label_coarse, loss_weight=0.65)
+
+#     n.fc_fine         = L.InnerProduct(n.drop_last, num_output=100, weight_filler=wgt_filler, param=learned_param)
+#     n.accuracy_fine   = L.Accuracy(n.fc_fine, n.label_fine)
+#     n.loss_fine       = L.SoftmaxWithLoss(n.fc_fine, n.label_fine, loss_weight=0.35)
+##     n.fc_avpool_fine  = L.Pooling(n.fc_fine, kernel_size=2, stride=2, pool=P.Pooling.AVE)
+##     n.accuracy_fine   = L.Accuracy(n.fc_avpool_fine, n.label_fine)
+##     n.loss_fine       = L.SoftmaxWithLoss(n.fc_avpool_fine, n.label_fine, loss_weight=0.35)
+
+    return n.to_proto()
+
+with open('dvia_pretrain.prototxt', 'w') as f:
+    lmdb      = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_lmdb')
+    mean_file = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_mean.binaryproto')
+    prto = str(cnn_cifar(lmdb, mean_file, 100, mirror=True))
+    prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
+    f.write(prto)
+    
+with open('dvia_pretest.prototxt', 'w') as f:
+    lmdb      = os.path.join(cifar_db_root, 'data/cifar_32x32/val_lmdb')
+    mean_file = os.path.join(cifar_db_root, 'data/cifar_32x32/val_mean.binaryproto')
+    prto = str(cnn_cifar(lmdb, mean_file, 120, mirror=False))
+    prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
+    f.write(prto)
+
+!python /usr/local/caffe/python/draw_net.py dvia_pretrain.prototxt cifar_net.png
+
+# For training
+def cnn(lmdb, mean_file, batch_size, mirror=True):
+    n = caffe.NetSpec()
+    ## Input LMDB data layer
+    n.data, n.label = L.Data(batch_size=batch_size, source=lmdb, backend=P.Data.LMDB, 
+                             transform_param=dict(scale=1./256, mirror=True, mean_file=mean_file), ntop=2)
+
+    # Create inner layers
+    n = cnn_inner_layers(n, frozen_param)
+
+    # Output 4-class classifier
+    n.fc_class         = L.InnerProduct(n.relu_last, num_output=4, weight_filler=wgt_filler, param=learned_param)
+    n.accuracy_class   = L.Accuracy(n.fc_class, n.label)
+    n.loss_class       = L.SoftmaxWithLoss(n.fc_class, n.label)
+
+##     n.fc_class         = L.Convolution(n.drop_last, kernel_size=1, stride=1, num_output=4, weight_filler=wgt_filler, param=learned_param)
+##     n.fc_avpool_class  = L.Pooling(n.fc_class, kernel_size=2, stride=2, pool=P.Pooling.AVE)
+##     n.accuracy_class   = L.Accuracy(n.fc_avpool_class, n.label)
+##     n.loss_class       = L.SoftmaxWithLoss(n.fc_avpool_class, n.label)
+
+    return n.to_proto()
+
+with open('dvia_train.prototxt', 'w') as f:
+    lmdb      = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_lmdb')
+    mean_file = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_mean.binaryproto')
+    prto = str(cnn(lmdb, mean_file, 80, mirror=True))
+    prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
+    f.write(prto)
+    
+with open('dvia_test.prototxt', 'w') as f:
+    lmdb      = os.path.join(dvia_db_root, 'data/dvia_32x32/val_lmdb')
+    mean_file = os.path.join(dvia_db_root, 'data/dvia_32x32/val_mean.binaryproto')
+    prto = str(cnn(lmdb, mean_file, 90, mirror=True))
+    prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
+    f.write(prto)
+
+!python /usr/local/caffe/python/draw_net.py dvia_train.prototxt dvia_net.png
+
+##################################################
+# 3
+##################################################
+caffe.set_mode_gpu()
+solver = None
+solver = caffe.get_solver('dvia_solver.prototxt')
+
+print("Layers' features:")
+[(k, v.data.shape) for k, v in solver.net.blobs.items()]
+
+print("Parameters and shape:")
+[(k, v[0].data.shape) for k, v in solver.net.params.items()]
+
+##################################################
+# 4
+##################################################
+solver = None
+%time !caffe train -solver dvia_presolver.prototxt
+!ls -rt cifar_pretrain_iter*.caffemodel | tail -n1 | xargs -i cp {} cifar_pretrained.caffemodel
+
+print("dvia_solver.prototxt :")
+!cat dvia_solver.prototxt
+
+
+##################################################
+# 5
+##################################################
+solver = None
+%time !caffe train -solver dvia_solver.prototxt -weights cifar_pretrained.caffemodel
+
+
+
+##################################################
+# 6
+##################################################
+!ls -rt dvia_train_iter*.caffemodel | tail -n1 | xargs -i cp {} dvia_trained.caffemodel
+%time !caffe test -model dvia_test.prototxt -weights dvia_trained.caffemodel -iterations 100
+
+
+
