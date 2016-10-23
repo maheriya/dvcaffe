@@ -1,0 +1,54 @@
+#!/bin/csh -f
+
+alias chkst 'if ($status != 0) then \
+  echo "Failure!"; \
+  exit(1); \
+endif'
+set cdir = `pwd`
+set prefix = '/usr/local/dvcaffe'
+
+set ver=1.0.0-dvcaffe
+echo "This will install Caffe" $ver
+
+#goto LDCONFIG
+#goto BUILD
+#cd build && goto INSTALL || exit (1)
+## Dependencies (run ~/Projects/DVIA/misc/bin/install_caffe_opencv_dependencies instead)
+##sudo apt-get -y install --install-recommends libatlas3-base libatlas3-base libatlas-dev libatlas-base-dev 
+##sudo apt-get -y install libboost-dev libboost-filesystem-dev 
+##sudo apt-get -y install --install-recommends libprotobuf-dev protobuf-compiler python-protobuf 
+##sudo apt-get -y install --install-recommends libgoogle-glog-dev libgflags-dev libhdf5-dev liblmdb-dev liblmdb0 lmdb-doc 
+##sudo apt-get -y install --install-recommends snappy libsnappy-dev libleveldb-dev python-leveldb
+
+BUILD:
+cd $cdir
+if (! -d build) mkdir build
+cd build
+#goto MAKE
+cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=$prefix ..
+
+MAKE:
+make -j8
+chkst
+goto INSTALL
+make test
+chkst
+make runtest
+chkst
+
+INSTALL:
+sudo make install
+##--sudo checkinstall --nodoc --strip=yes --backup=no \
+##--        --default \
+##--        --pkgname=caffe-frcnn \
+##--        --pkgversion=${ver} \
+##--        --requires=libatlas3-base,libatlas3-base,libatlas-dev,libatlas-base-dev,libboost-dev,libboost-filesystem-dev,libprotobuf-dev,protobuf-compiler,python-protobuf,libgoogle-glog-dev,libgflags-dev,libhdf5-dev,liblmdb-dev,liblmdb0,lmdb-doc,libsnappy-dev,libleveldb-dev,python-leveldb
+##--
+chkst
+
+
+LDCONFIG:
+##--set ldstr = ( echo "${prefix}/lib" )
+##--sudo sh -c "$ldstr > /etc/ld.so.conf.d/caffe-dvcaffe.conf"
+##--sudo ldconfig
+echo "Caffe" $ver "ready to be used"
