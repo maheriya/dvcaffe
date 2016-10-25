@@ -10,7 +10,7 @@ layer {
   }
   data_param {
     source: "/home/maheriya/Projects/IMAGES/dvia/png.32x32/data/dvia_32x32/trn_lmdb"
-    batch_size: 80
+    batch_size: 120
     backend: LMDB
   }
 }
@@ -28,7 +28,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 48
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -56,7 +56,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 48
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -84,7 +84,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 48
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -123,7 +123,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 120
+    num_output: 96
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -162,7 +162,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 200
+    num_output: 192
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -201,7 +201,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 400
+    num_output: 384
     kernel_size: 1
     stride: 1
     weight_filler {

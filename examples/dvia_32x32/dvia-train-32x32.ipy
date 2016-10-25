@@ -52,26 +52,26 @@ def cnn_inner_layers(n, param=learned_param):
     It is assumed that n.data is already created.
     '''
     # First main conv layer
-    n.conv1  = L.Convolution(n.data,     kernel_size=3, stride=1, num_output=64, weight_filler=wgt_filler, param=param)
+    n.conv1  = L.Convolution(n.data,     kernel_size=3, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
     n.relu1  = L.ReLU(n.conv1, in_place=True)
-    n.cccp1a = L.Convolution(n.relu1,    kernel_size=1, stride=1, num_output=64, weight_filler=wgt_filler, param=param)
+    n.cccp1a = L.Convolution(n.relu1,    kernel_size=1, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
     n.relu1a = L.ReLU(n.cccp1a, in_place=True)
-    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=64, weight_filler=wgt_filler, param=param)
+    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
     n.pool1  = L.Pooling(n.cccp1b,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu1b = L.ReLU(n.pool1, in_place=True)
 
     # Second main conv layer
-    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=120, weight_filler=wgt_filler, param=learned_param)
+    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=96, weight_filler=wgt_filler, param=learned_param)
     n.pool2  = L.Pooling(n.conv2,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu2  = L.ReLU(n.pool2, in_place=True)
 
     # Third and last main convolution layer.
-    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=200, weight_filler=wgt_filler, param=learned_param)
+    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=192, weight_filler=wgt_filler, param=learned_param)
     n.pool3  = L.Pooling(n.conv3,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu3  = L.ReLU(n.pool3, in_place=True)
 
     # Last fc converted to convolution.
-    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=400, weight_filler=wgt_filler, param=learned_param)
+    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=384, weight_filler=wgt_filler, param=learned_param)
     n.relu_last = L.ReLU(n.conv_last, in_place=True)
     return n
 
@@ -107,7 +107,7 @@ def cnn_cifar(imgdb, mean_file, batch_size, mirror=True):
 with open('dvia_pretrain.prototxt', 'w') as f:
     lmdb      = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_lmdb')
     mean_file = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_mean.binaryproto')
-    prto = str(cnn_cifar(lmdb, mean_file, 100, mirror=True))
+    prto = str(cnn_cifar(lmdb, mean_file, 120, mirror=True))
     prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
     f.write(prto)
     
@@ -145,14 +145,14 @@ def cnn(lmdb, mean_file, batch_size, mirror=True):
 with open('dvia_train.prototxt', 'w') as f:
     lmdb      = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_lmdb')
     mean_file = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_mean.binaryproto')
-    prto = str(cnn(lmdb, mean_file, 80, mirror=True))
+    prto = str(cnn(lmdb, mean_file, 120, mirror=True))
     prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
     f.write(prto)
     
 with open('dvia_test.prototxt', 'w') as f:
     lmdb      = os.path.join(dvia_db_root, 'data/dvia_32x32/val_lmdb')
     mean_file = os.path.join(dvia_db_root, 'data/dvia_32x32/val_mean.binaryproto')
-    prto = str(cnn(lmdb, mean_file, 90, mirror=True))
+    prto = str(cnn(lmdb, mean_file, 120, mirror=True))
     prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
     f.write(prto)
 
