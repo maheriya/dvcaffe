@@ -29,7 +29,7 @@ layer {
   }
   convolution_param {
     num_output: 64
-    kernel_size: 4
+    kernel_size: 5
     stride: 1
     weight_filler {
       type: "xavier"
@@ -78,7 +78,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 32
+    num_output: 42
     kernel_size: 1
     stride: 1
     weight_filler {
@@ -93,7 +93,7 @@ layer {
   top: "pool1"
   pooling_param {
     pool: MAX
-    kernel_size: 3
+    kernel_size: 2
     stride: 2
   }
 }
@@ -117,8 +117,8 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 42
-    kernel_size: 4
+    num_output: 64
+    kernel_size: 3
     stride: 1
     weight_filler {
       type: "xavier"
@@ -132,7 +132,7 @@ layer {
   top: "pool2"
   pooling_param {
     pool: MAX
-    kernel_size: 3
+    kernel_size: 2
     stride: 2
   }
 }
@@ -156,8 +156,8 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
-    kernel_size: 2
+    num_output: 128
+    kernel_size: 3
     stride: 1
     weight_filler {
       type: "xavier"
@@ -182,10 +182,10 @@ layer {
   top: "pool3"
 }
 layer {
-  name: "fc_last"
-  type: "InnerProduct"
+  name: "conv_last"
+  type: "Convolution"
   bottom: "pool3"
-  top: "fc_last"
+  top: "conv_last"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -194,8 +194,10 @@ layer {
     lr_mult: 2
     decay_mult: 0
   }
-  inner_product_param {
-    num_output: 768
+  convolution_param {
+    num_output: 256
+    kernel_size: 1
+    stride: 1
     weight_filler {
       type: "xavier"
     }
@@ -204,13 +206,13 @@ layer {
 layer {
   name: "relu_last"
   type: "ReLU"
-  bottom: "fc_last"
-  top: "fc_last"
+  bottom: "conv_last"
+  top: "conv_last"
 }
 layer {
   name: "fc_class"
   type: "InnerProduct"
-  bottom: "fc_last"
+  bottom: "conv_last"
   top: "fc_class"
   param {
     lr_mult: 1
