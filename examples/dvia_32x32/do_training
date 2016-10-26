@@ -1,0 +1,4 @@
+#!/bin/csh -f
+
+# The log file is checked in
+ipython dvia-train-32x32.ipy | & tee dvia-train-32x32.ipy.log

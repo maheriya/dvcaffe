@@ -30,8 +30,8 @@ bias_param   = dict(lr_mult=2, decay_mult=0)
 ## Use for training from scratch
 learned_param = [weight_param, bias_param]
 
-frozen_weight_param = dict(lr_mult=0.2, decay_mult=0.2)  # weight_param*0.2
-frozen_bias_param   = dict(lr_mult=0.4, decay_mult=0)    # weight_param*0.2
+frozen_weight_param = dict(lr_mult=0.1, decay_mult=0.1)  # weight_param*0.1
+frozen_bias_param   = dict(lr_mult=0.2, decay_mult=0)    # weight_param*0.1
 ## Use for training from a pretrained model
 frozen_param = [frozen_weight_param, frozen_bias_param]
 
@@ -51,28 +51,30 @@ def cnn_inner_layers(n, param=learned_param):
     n: caffe.NetSpec instance
     It is assumed that n.data is already created.
     '''
+    ## This version is the same as Cifar network by guillaume-chevalier accept for relu_last (which is sigmoid in original)
     # First main conv layer
-    n.conv1  = L.Convolution(n.data,     kernel_size=3, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
-    n.relu1  = L.ReLU(n.conv1, in_place=True)
-    n.cccp1a = L.Convolution(n.relu1,    kernel_size=1, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
+    n.conv1  = L.Convolution(n.data,     kernel_size=4, stride=1, num_output=64, weight_filler=wgt_filler, param=param)
+    n.cccp1a = L.Convolution(n.conv1,    kernel_size=1, stride=1, num_output=42, weight_filler=wgt_filler, param=param)
     n.relu1a = L.ReLU(n.cccp1a, in_place=True)
-    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=48, weight_filler=wgt_filler, param=param)
-    n.pool1  = L.Pooling(n.cccp1b,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=32, weight_filler=wgt_filler, param=param)
+    n.pool1  = L.Pooling(n.cccp1b,       kernel_size=3, stride=2, pool=P.Pooling.MAX)
     n.relu1b = L.ReLU(n.pool1, in_place=True)
 
     # Second main conv layer
-    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=96, weight_filler=wgt_filler, param=learned_param)
-    n.pool2  = L.Pooling(n.conv2,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.conv2  = L.Convolution(n.relu1b,   kernel_size=4, stride=1, num_output=42, weight_filler=wgt_filler, param=learned_param)
+    n.pool2  = L.Pooling(n.conv2,        kernel_size=3, stride=2, pool=P.Pooling.MAX)
     n.relu2  = L.ReLU(n.pool2, in_place=True)
 
     # Third and last main convolution layer.
-    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=192, weight_filler=wgt_filler, param=learned_param)
+    n.conv3  = L.Convolution(n.relu2,    kernel_size=2, stride=1, num_output=64, weight_filler=wgt_filler, param=learned_param)
     n.pool3  = L.Pooling(n.conv3,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu3  = L.ReLU(n.pool3, in_place=True)
 
     # Last fc converted to convolution.
-    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=384, weight_filler=wgt_filler, param=learned_param)
-    n.relu_last = L.ReLU(n.conv_last, in_place=True)
+    #--n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=200, weight_filler=wgt_filler, param=learned_param)
+    #--n.relu_last = L.ReLU(n.conv_last, in_place=True)
+    n.fc_last   = L.InnerProduct(n.relu3, num_output=768, weight_filler=wgt_filler, param=learned_param)
+    n.relu_last = L.ReLU(n.fc_last, in_place=True)
     return n
 
 
@@ -165,11 +167,9 @@ caffe.set_mode_gpu()
 solver = None
 solver = caffe.get_solver('dvia_solver.prototxt')
 
-print("Layers' features:")
-[(k, v.data.shape) for k, v in solver.net.blobs.items()]
+print("Layers' features:\n{}".format([(k, v.data.shape) for k, v in solver.net.blobs.items()])
 
-print("Parameters and shape:")
-[(k, v[0].data.shape) for k, v in solver.net.params.items()]
+print("Parameters and shape:\n{}".format([(k, v[0].data.shape) for k, v in solver.net.params.items()])
 
 ##################################################
 # 4

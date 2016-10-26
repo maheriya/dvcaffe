@@ -14,7 +14,7 @@ power: 0.75
 
 display: 100
 
-max_iter: 150000
+max_iter: 200000
 
 snapshot: 25000
 snapshot_prefix: "cifar_pretrain"
