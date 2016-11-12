@@ -10,7 +10,7 @@ layer {
   }
   data_param {
     source: "/home/maheriya/Projects/IMAGES/dvia/png.32x32/data/dvia_32x32/trn_lmdb"
-    batch_size: 120
+    batch_size: 100
     backend: LMDB
   }
 }
@@ -20,66 +20,16 @@ layer {
   bottom: "data"
   top: "conv1"
   param {
-    lr_mult: 0.1
-    decay_mult: 0.1
+    lr_mult: 0.2
+    decay_mult: 0.2
   }
   param {
-    lr_mult: 0.2
+    lr_mult: 0.4
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 80
     kernel_size: 5
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-  }
-}
-layer {
-  name: "cccp1a"
-  type: "Convolution"
-  bottom: "conv1"
-  top: "cccp1a"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  param {
-    lr_mult: 0.2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 42
-    kernel_size: 1
-    stride: 1
-    weight_filler {
-      type: "xavier"
-    }
-  }
-}
-layer {
-  name: "relu1a"
-  type: "ReLU"
-  bottom: "cccp1a"
-  top: "cccp1a"
-}
-layer {
-  name: "cccp1b"
-  type: "Convolution"
-  bottom: "cccp1a"
-  top: "cccp1b"
-  param {
-    lr_mult: 0.1
-    decay_mult: 0.1
-  }
-  param {
-    lr_mult: 0.2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 42
-    kernel_size: 1
     stride: 1
     weight_filler {
       type: "xavier"
@@ -89,7 +39,7 @@ layer {
 layer {
   name: "pool1"
   type: "Pooling"
-  bottom: "cccp1b"
+  bottom: "conv1"
   top: "pool1"
   pooling_param {
     pool: MAX
@@ -117,7 +67,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 64
+    num_output: 160
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -156,7 +106,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 128
+    num_output: 256
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -195,7 +145,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 384
     kernel_size: 1
     stride: 1
     weight_filler {

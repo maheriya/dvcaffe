@@ -30,8 +30,8 @@ bias_param   = dict(lr_mult=2, decay_mult=0)
 ## Use for training from scratch
 learned_param = [weight_param, bias_param]
 
-frozen_weight_param = dict(lr_mult=0.1, decay_mult=0.1)  # weight_param*0.1
-frozen_bias_param   = dict(lr_mult=0.2, decay_mult=0)    # weight_param*0.1
+frozen_weight_param = dict(lr_mult=0.2, decay_mult=0.2)  # weight_param*0.2
+frozen_bias_param   = dict(lr_mult=0.4, decay_mult=0)    # weight_param*0.2
 ## Use for training from a pretrained model
 frozen_param = [frozen_weight_param, frozen_bias_param]
 
@@ -52,25 +52,26 @@ def cnn_inner_layers(n, param=learned_param):
     It is assumed that n.data is already created.
     '''
     # First main conv layer
-    n.conv1  = L.Convolution(n.data,     kernel_size=5, stride=1, num_output=64, weight_filler=wgt_filler, param=param)
-    n.cccp1a = L.Convolution(n.conv1,    kernel_size=1, stride=1, num_output=42, weight_filler=wgt_filler, param=param)
-    n.relu1a = L.ReLU(n.cccp1a, in_place=True)
-    n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=42, weight_filler=wgt_filler, param=param)
-    n.pool1  = L.Pooling(n.cccp1b,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.conv1  = L.Convolution(n.data,     kernel_size=5, stride=1, num_output=80, weight_filler=wgt_filler, param=param)
+    #n.cccp1a = L.Convolution(n.conv1,    kernel_size=1, stride=1, num_output=42, weight_filler=wgt_filler, param=param)
+    #n.relu1a = L.ReLU(n.cccp1a, in_place=True)
+    #n.cccp1b = L.Convolution(n.relu1a,   kernel_size=1, stride=1, num_output=42, weight_filler=wgt_filler, param=param)
+    #n.pool1  = L.Pooling(n.cccp1b,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
+    n.pool1  = L.Pooling(n.conv1,       kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu1b = L.ReLU(n.pool1, in_place=True)
 
     # Second main conv layer
-    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=64, weight_filler=wgt_filler, param=learned_param)
+    n.conv2  = L.Convolution(n.relu1b,   kernel_size=3, stride=1, num_output=160, weight_filler=wgt_filler, param=param)
     n.pool2  = L.Pooling(n.conv2,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu2  = L.ReLU(n.pool2, in_place=True)
 
     # Third and last main convolution layer.
-    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=128, weight_filler=wgt_filler, param=learned_param)
+    n.conv3  = L.Convolution(n.relu2,    kernel_size=3, stride=1, num_output=256, weight_filler=wgt_filler, param=learned_param)
     n.pool3  = L.Pooling(n.conv3,        kernel_size=2, stride=2, pool=P.Pooling.MAX)
     n.relu3  = L.ReLU(n.pool3, in_place=True)
 
     # Last fc converted to convolution.
-    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=256, weight_filler=wgt_filler, param=learned_param)
+    n.conv_last = L.Convolution(n.relu3, kernel_size=1, stride=1, num_output=384, weight_filler=wgt_filler, param=learned_param)
     n.relu_last = L.ReLU(n.conv_last, in_place=True)
     #--n.fc_last   = L.InnerProduct(n.relu3, num_output=768, weight_filler=wgt_filler, param=learned_param)
     #--n.relu_last = L.ReLU(n.fc_last, in_place=True)
@@ -108,7 +109,7 @@ def cnn_cifar(imgdb, mean_file, batch_size, mirror=True):
 with open('dvia_pretrain.prototxt', 'w') as f:
     lmdb      = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_lmdb')
     mean_file = os.path.join(cifar_db_root, 'data/cifar_32x32/trn_mean.binaryproto')
-    prto = str(cnn_cifar(lmdb, mean_file, 120, mirror=True))
+    prto = str(cnn_cifar(lmdb, mean_file, 100, mirror=True))
     prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
     f.write(prto)
     
@@ -146,7 +147,7 @@ def cnn(lmdb, mean_file, batch_size, mirror=True):
 with open('dvia_train.prototxt', 'w') as f:
     lmdb      = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_lmdb')
     mean_file = os.path.join(dvia_db_root, 'data/dvia_32x32/trn_mean.binaryproto')
-    prto = str(cnn(lmdb, mean_file, 120, mirror=True))
+    prto = str(cnn(lmdb, mean_file, 100, mirror=True))
     prto = re.sub(r'top: "(bn[0-3])"(\s+)param {[^}]+}', 'top: "\\1"\\2{}'.format(bn_param), prto)
     f.write(prto)
     
@@ -171,7 +172,7 @@ print("Layers' features:\n{}".format([(k, v.data.shape) for k, v in solver.net.b
 print("Parameters and shape:\n{}".format([(k, v[0].data.shape) for k, v in solver.net.params.items()]))
 
 ##################################################
-# 4
+# 4: Pre-train the model with Cifar data
 ##################################################
 solver = None
 %time !caffe train -solver dvia_presolver.prototxt
@@ -182,7 +183,7 @@ print("dvia_solver.prototxt :")
 
 
 ##################################################
-# 5
+# 5: Train the model with DVIA DB
 ##################################################
 solver = None
 %time !caffe train -solver dvia_solver.prototxt -weights cifar_pretrained.caffemodel
@@ -190,7 +191,7 @@ solver = None
 
 
 ##################################################
-# 6
+# 6: Test score the model
 ##################################################
 !ls -rt dvia_train_iter*.caffemodel | tail -n1 | xargs -i cp {} dvia_trained.caffemodel
 %time !caffe test -model dvia_test.prototxt -weights dvia_trained.caffemodel -iterations 100
