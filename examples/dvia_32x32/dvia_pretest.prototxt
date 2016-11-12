@@ -28,7 +28,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 80
+    num_output: 64
     kernel_size: 5
     stride: 1
     weight_filler {
@@ -67,7 +67,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 160
+    num_output: 100
     kernel_size: 3
     stride: 1
     weight_filler {
@@ -106,7 +106,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 256
+    num_output: 200
     kernel_size: 3
     stride: 1
     weight_filler {
